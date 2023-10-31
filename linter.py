@@ -54,6 +54,7 @@ DEFAULT_CONFIG = {
 ALL_FILES_BLACKLISTED_NAMES = ['cmake-build-debug', '3rd_party', 'third_party']
 
 CPP_SUFFIXES = ['.cpp', '.cc', '.cu', '.cuh', '.h', '.hpp', '.hxx']
+CPP_HEADER_SUFFIXES = ['.cuh', '.h', '.hpp', '.hxx']
 
 
 def get_user_confirmation(default=False):
@@ -177,53 +178,68 @@ def check_cpp_lint(staged_files, cpplint_file, ascii_art, repo_root):
         if not os.path.isfile(changed_file):
             continue
         if changed_file.lower().endswith(tuple(CPP_SUFFIXES)):
-            # Search iteratively for the root of the catkin package.
-            package_root = ''
-            search_dir = os.path.dirname(os.path.abspath(changed_file))
-            found_package_root = False
-            MAX_DEPTH_OF_FILES = 100
-            for _ in range(1, MAX_DEPTH_OF_FILES):
-                if os.path.isfile(search_dir + '/package.xml'):
-                    package_root = search_dir
-                    found_package_root = True
-                    break
-                # Stop if the root of the git repo is reached.
-                if os.path.isdir(search_dir + '/.git'):
-                    break
-                search_dir = os.path.dirname(search_dir)
-            assert found_package_root, ("Could not find the root of the "
-                                        "catkin package that contains: "
-                                        "{}".format(changed_file))
-
-            # Get relative path to repository root.
             if os.path.isfile(os.path.join(repo_root, '.git')):
                 # Repo is a submodule, look for parent git repository containing
                 # this submodule.
                 search_path = repo_root
-                found_to_level_git_repo = False
+                found_top_level_git_repo = False
                 for _ in range(10):
                     search_path = os.path.dirname(repo_root)
                     if os.path.isdir(os.path.join(search_path, '.git')):
-                        found_to_level_git_repo = True
+                        found_top_level_git_repo = True
                         break
 
-                assert found_to_level_git_repo
+                assert found_top_level_git_repo
                 repo_root = search_path
 
-            common_prefix = os.path.commonprefix(
-                [os.path.abspath(repo_root),
-                 os.path.abspath(package_root)])
-            package_root = os.path.relpath(package_root, common_prefix)
+            check_ros_package = True
+            # if check_ros_package and changed_file.lower().endswith(tuple(CPP_HEADER_SUFFIXES)):
+            if check_ros_package:                
+                # Set `cpplint._root` to the path of '<package>/include' relative to
+                # the top-level ropo. Otherwise the header guard logic will fail!
+                #
+                # Why? How dows the header guard logic work? Is this only necessary for
+                # checking ".h/.hpp" files (which have "#ifndef xxx_h" in their begining)?
+                # Is it also necessary for ".cpp/.cc" files?
 
-            # The package root needs to be relative to the (top-level) repo
-            # root. Otherwise the header guard logic will fail!
-            cpplint._root = package_root + '/include'  # pylint: disable=W0212
+                # Search iteratively for the root of the catkin package.
+                package_root = ''
+                search_dir = os.path.dirname(os.path.abspath(changed_file))
+                found_package_root = False
+                MAX_DEPTH_OF_FILES = 100
+                for _ in range(1, MAX_DEPTH_OF_FILES):
+                    if os.path.isfile(search_dir + '/package.xml'):
+                        package_root = search_dir
+                        found_package_root = True
+                        break
+                    # Stop if the root of the git repo is reached.
+                    if os.path.isdir(search_dir + '/.git'):
+                        # reach the TOP level git repo.
+                        break
+                    search_dir = os.path.dirname(search_dir)
+                assert found_package_root, ("Could not find the root of the "
+                                            "catkin package that contains: "
+                                            "{}".format(changed_file))
+
+                # Get relative path to repository root (the top level git repo).
+                # Get the path of package_root relative to repository root (the top level git repo).
+                common_prefix = os.path.commonprefix(
+                    [os.path.abspath(repo_root),
+                    os.path.abspath(package_root)])
+                package_root = os.path.relpath(package_root, common_prefix)
+
+                # The package root needs to be relative to the (top-level) repo
+                # root. Otherwise the header guard logic will fail!
+                cpplint._root = package_root + '/include'  # pylint: disable=W0212
+                # Why do we need to set 'cpplint._root' to the path of '<package>/include'
+                # relative to top-level ropo root?? How dows the header guard logic works?
 
             # Reset error count and messages:
             cpplint.output = []
             cpplint._cpplint_state.ResetErrorCounts()  # pylint: disable=W0212
             v_level = cpplint._cpplint_state.verbose_level  # pylint: disable=W0212
 
+            # process one file
             cpplint.ProcessFile(changed_file, v_level)
 
             error_count = cpplint._cpplint_state.error_count  # pylint: disable=W0212
