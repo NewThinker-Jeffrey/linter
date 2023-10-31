@@ -327,6 +327,11 @@ def find_clang_format_executable():
 def run_clang_format(repo_root, staged_files, list_of_changed_staged_files):
     """Runs clang format on all cpp files staged for commit."""
 
+    # cmd example:  
+    #   `git diff -U0 --cached | clang-format -style=file -p1 > /tmp/xxx.clang.patch`
+    #   `git apply -p0 /tmp/xxx.clang.patch`
+    #   `git add xxx yyy ...`
+
     clang_format_path = ("/tmp/" +
                          os.path.basename(os.path.normpath(repo_root)) + "_" +
                          datetime.datetime.now().isoformat() + ".clang.patch")
@@ -358,6 +363,8 @@ def run_clang_format(repo_root, staged_files, list_of_changed_staged_files):
 
 def run_clang_format_on_all(repo_root, files):
     """Runs clang format on all cpp files in repo."""
+
+    # cmd example:  `clang-format -i xxx.cpp`
 
     clang_format_executable = find_clang_format_executable()
     counter = 0
@@ -391,6 +398,11 @@ def run_clang_format_on_all(repo_root, files):
 
 def run_yapf_format(repo_root, staged_files, list_of_changed_staged_files):
     """Runs yapf format on all python files staged for commit."""
+
+    # cmd example: 
+    #   `yapf --style pep8 -d xxx.py > /tmp/yyy.yapf.patch`
+    #   `git apply -p0 /tmp/yyy.yapf.patch`
+    #   `git add xxx.py`
 
     first_file_formatted = True
     for staged_file in staged_files:
@@ -433,6 +445,10 @@ def run_yapf_format(repo_root, staged_files, list_of_changed_staged_files):
 
 def run_yapf_format_on_all(repo_root, files):
     """Runs yapf format on all python files."""
+
+    # cmd example: 
+    #   `yapf --style pep8 -d xxx.py > /tmp/yyy.yapf.patch`
+    #   `git apply -p0 /tmp/yyy.yapf.patch`
 
     # Check if the file needs formatting by applying the formatting and
     # store the results into a patch file.
