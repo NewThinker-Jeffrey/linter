@@ -98,6 +98,7 @@ def read_linter_config(filename):
 
 def run_command_in_folder(command, folder):
     """Run a bash command in a specific folder."""
+    print("run_command_in_folder[{}]:  {}".format(folder, command))
     run_command = subprocess.Popen(command,
                                    shell=True,
                                    cwd=folder,
@@ -120,10 +121,19 @@ def get_number_of_commits(some_folder_in_root_repo='./'):
     return num_commits
 
 
-def get_staged_files(some_folder_in_root_repo='./'):
+def get_staged_files(some_folder_in_root_repo='./', skip_blacklisted = True):
     """Get all staged files from git."""
     output = run_command_in_folder("git diff --staged --name-only",
                                    some_folder_in_root_repo)
+    if output and skip_blacklisted:
+        filterd_output = []
+        for name in output:
+            full_name = os.path.abspath(name)
+            if not any(n in full_name
+                        for n in ALL_FILES_BLACKLISTED_NAMES):
+                filterd_output.append(full_name)
+        output = filterd_output
+
     if not output:
         return []
     else:
