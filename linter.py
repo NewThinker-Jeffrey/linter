@@ -126,19 +126,23 @@ def get_staged_files(some_folder_in_root_repo='./', skip_blacklisted = True):
     """Get all staged files from git."""
     output = run_command_in_folder("git diff --staged --name-only",
                                    some_folder_in_root_repo)
+    if not output:
+        return []
+
+    output = output.split("\n")
+    print (">>>>>>>>>>>>>\noutput before filtering:\n\n{}".format(output))
     if output and skip_blacklisted:
         filterd_output = []
         for name in output:
             full_name = os.path.abspath(name)
             if not any(n in full_name
                         for n in ALL_FILES_BLACKLISTED_NAMES):
-                filterd_output.append(full_name)
+                # filterd_output.append(full_name)
+                filterd_output.append(name)
         output = filterd_output
-
-    if not output:
-        return []
-    else:
-        return output.split("\n")
+    print (">>>>>>>>>>>>>\noutput after filtering:\n\n{}".format(output))
+    print (">>>>>>>>>>>>>\n")
+    return output
 
 
 def get_unstaged_files(some_folder_in_root_repo='./'):
@@ -194,7 +198,7 @@ def check_cpp_lint(staged_files, cpplint_file, ascii_art, repo_root):
 
             check_ros_package = True
             # if check_ros_package and changed_file.lower().endswith(tuple(CPP_HEADER_SUFFIXES)):
-            if check_ros_package:                
+            if check_ros_package:
                 # Set `cpplint._root` to the path of '<package>/include' relative to
                 # the top-level ropo. Otherwise the header guard logic will fail!
                 #

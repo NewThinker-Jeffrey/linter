@@ -32,7 +32,13 @@ import yaml
 
 default_cpplint = "modified_cpplint.py"
 
-cpplint_url = ""
+# cpplint_url = ""
+
+## cpplint.py in this url doesn't deal with unicode well and causes errors
+# cpplint_url = "https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py"
+
+## cpplint.py in this new url is good.
+cpplint_url = "https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py"
 
 CLANG_FORMAT_DIFF_EXECUTABLE_VERSIONS = [
     "clang-format-diff", "clang-format-diff-6.0", "clang-format-diff-5.0",
@@ -44,7 +50,7 @@ def download_file_from_url(url, file_path):
     """Download a file from a HTTPS URL. Verification is enabled."""
     request = requests.get(url, verify=True, stream=True)
     request.raw.decode_content = True
-    with open(file_path, 'w') as downloaded_file:
+    with open(file_path, 'wb') as downloaded_file:
         shutil.copyfileobj(request.raw, downloaded_file)
 
 
