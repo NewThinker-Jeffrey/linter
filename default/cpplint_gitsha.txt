@@ -1,0 +1,15 @@
+cpplint_gitsha=7b88b68187e3516540fab3caa900988d2179ed24
+
+# # https://github.com/cpplint/cpplint
+# git clone https://github.com/cpplint/cpplint.git
+# cd  cpplint
+# git checkout $cpplint_gitsha
+# md5sum cpplint.py 
+#     97c0fb14f5897bcb993bd2854f16aebb  cpplint.py
+# git log -1
+#     commit 7b88b68187e3516540fab3caa900988d2179ed24 (HEAD -> develop, origin/develop, origin/HEAD)
+#     Author: Nate Clark <nate@neworld.us>
+#     Date:   Fri Feb 3 10:16:23 2023 -0500
+# 
+#         lint: Remove unnecessary parens
+
