@@ -39,7 +39,7 @@ import yaml
 # cpplint_url = "https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py"
 
 cpplint_url = ""  # we have already downloaded and put it in this repo.
-default_cpplint = "cpplint.py"  # the downloaded cpplint.
+default_cpplint = "downloaded-cpplint.py"  # the downloaded cpplint.
 
 
 CLANG_FORMAT_DIFF_EXECUTABLE_VERSIONS = [
