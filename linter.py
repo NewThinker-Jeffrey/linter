@@ -435,7 +435,12 @@ def run_yapf_format(repo_root, staged_files, list_of_changed_staged_files):
                                 os.path.basename(os.path.normpath(repo_root)) +
                                 "_" + datetime.datetime.now().isoformat() +
                                 ".yapf.patch")
-            task = (YAPF_FORMAT_EXECUTABLE + " --style pep8 -d " +
+            # task = (YAPF_FORMAT_EXECUTABLE + " --style pep8 -d " +
+            #         staged_file + " > " + yapf_format_path)
+
+            # The style should specified in the .style.yapf file under the
+            # root of your repository.
+            task = (YAPF_FORMAT_EXECUTABLE + " -d " +
                     staged_file + " > " + yapf_format_path)
             run_command_in_folder(task, repo_root)
 
